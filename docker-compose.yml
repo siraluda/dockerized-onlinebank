@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+    bank_app:
+        build: 
+            context: .
+            dockerfile: Dockerfile
+        command: python /usr/app/manage.py runserver 0.0.0.0:8000
+        volumes: 
+            - .:/usr/app/
+        ports: 
+            - 8000:8000
+        env_file: 
+            - ./.env.dev
