@@ -14,6 +14,7 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENVIRONMENT = os.environ.get('ENVIRONMENT')
 
 
 # Quick-start development settings - unsuitable for production
@@ -23,15 +24,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('ONLINEBANK_APP_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(os.environ.get('DEBUG', default=0))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [os.environ.get("ALLOWED_HOSTS", default='localhost')]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    #installed additional apps
+    # third party apps
     'crispy_forms',
     
     # created apps
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -126,6 +128,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # CUSTOM USER MODEL
 AUTH_USER_MODEL = 'users.User'
@@ -140,3 +143,21 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASS')
 
 #CRISPY FORMS
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+# Security config for production. MUST DO!
+if ENVIRONMENT == 'production':
+    SECURE_BROWSER_XSS_FILTER = True # secure againts XSS attacks
+    X_FRAME_OPTIONS = 'DENY' # secure against clickjacking
+    SECURE_SSL_REDIRECT = True # redirect all non-https traffic to https
+
+    # enforce that web browsers should only interact with django app via HTTPS by adding a Strict-Transport-Security header
+    SECURE_HSTS_SECONDS = 3600 # 
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True # 
+    SECURE_HSTS_PRELOAD = True # 
+    SECURE_CONTENT_TYPE_NOSNIFF = True # 
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') # needed for heroku
+
+    SESSION_COOKIE_SECURE = True # secure cookie data by forcing over https
+    CSRF_COOKIE_SECURE = True # secure csrf token by forcing over https
+
